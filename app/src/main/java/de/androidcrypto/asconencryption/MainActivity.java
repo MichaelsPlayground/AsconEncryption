@@ -83,9 +83,10 @@ public class MainActivity extends AppCompatActivity {
 
                         byte[] key = "1234567890123456".getBytes(StandardCharsets.UTF_8);
                         byte[] nonce = "6543210987654321".getBytes(StandardCharsets.UTF_8);
-                        byte[] ciphertext;
+                        byte[] completeCiphertext;
                         byte[] decryptedtext;
-                        ciphertext = ascon128v12Encryption(key, nonce, plaintext, additionalData);
+                        completeCiphertext = ascon128v12Encryption(key, nonce, plaintext, additionalData);
+
                         printlnX("plaintext:  " + plaintextString);
                         printlnX("plaintext:  " + bytesToHex(plaintext));
                         printlnX("aead:       " + additionalDataString);
@@ -94,33 +95,56 @@ public class MainActivity extends AppCompatActivity {
                         printlnX("keyLen:     " + key.length);
                         printlnX("nonce:      " + bytesToHex(nonce));
                         printlnX("nonceLen:   " + nonce.length);
-                        printlnX("ciphertext: " + bytesToHex(ciphertext));
-                        printlnX("ciphertLen: " + ciphertext.length);
-                        decryptedtext = ascon128v12Decryption(key, nonce, ciphertext, additionalData);
+                        printlnX("ciphertext: " + bytesToHex(completeCiphertext));
+                        printlnX("ciphertLen: " + completeCiphertext.length);
+
+                        decryptedtext = ascon128v12Decryption(key, nonce, completeCiphertext, additionalData);
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
+
+                        // split the completeCiphertext in ciphertext and authentication tag
+                        byte[] ciphertext = new byte[(completeCiphertext.length - Ascon128v12.CRYPTO_ABYTES)];
+                        byte[] authenticationTag = new byte[Ascon128v12.CRYPTO_ABYTES];
+                        ascon128v12SplitCiphertext(completeCiphertext, ciphertext, authenticationTag);
+
+                        // combine the ciphertext and authenticationTag to completeCiphertext
+                        byte[] completeCiphertextConcat = new byte[(ciphertext.length + Ascon128v12.CRYPTO_ABYTES)];
+                        ascon128v12ConcatenateCiphertext(completeCiphertextConcat, ciphertext, authenticationTag);
+                        // run the decryption
+                        byte[] decryptedtextConcat;
+                        decryptedtextConcat = ascon128v12Decryption(key, nonce, completeCiphertextConcat, additionalData);
+
+                        printlnX("-------- complete ciphertext split --------");
+                        printlnX("ciphertext: " + bytesToHex(ciphertext));
+                        printlnX("ciphertLen: " + ciphertext.length);
+                        printlnX("authTag:    " + bytesToHex(authenticationTag));
+                        printlnX("authTagLen: " + authenticationTag.length);
+                        printlnX("decrypText: " + bytesToHex(decryptedtextConcat));
+                        printlnX("decrypText: " + new String(decryptedtextConcat, StandardCharsets.UTF_8));
+                        printlnX("-------- complete ciphertext split end ----");
 
                         printlnX("\n** wrong additional data for decryption **");
                         String additionalDataWrongString = "ABD";
                         byte[] additionalDataWrong = additionalDataWrongString.getBytes(StandardCharsets.UTF_8);
-                        decryptedtext = ascon128v12Decryption(key, nonce, ciphertext, additionalDataWrong);
+                        decryptedtext = ascon128v12Decryption(key, nonce, completeCiphertext, additionalDataWrong);
                         printlnX("aead wrong: " + bytesToHex(additionalDataWrong));
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
 
                         printlnX("\n** wrong key for decryption **");
                         byte[] keyWrong = "1234567890123457".getBytes(StandardCharsets.UTF_8);
-                        decryptedtext = ascon128v12Decryption(keyWrong, nonce, ciphertext, additionalData);
+                        decryptedtext = ascon128v12Decryption(keyWrong, nonce, completeCiphertext, additionalData);
                         printlnX("key wrong:  " + bytesToHex(keyWrong));
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
 
                         printlnX("\n** wrong nonce for decryption **");
                         byte[] nonceyWrong = "6543210987654320".getBytes(StandardCharsets.UTF_8);
-                        decryptedtext = ascon128v12Decryption(key, nonceyWrong, ciphertext, additionalData);
+                        decryptedtext = ascon128v12Decryption(key, nonceyWrong, completeCiphertext, additionalData);
                         printlnX("nonce wrong:" + bytesToHex(nonceyWrong));
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
+
                         break;
                     }
 
@@ -137,9 +161,10 @@ public class MainActivity extends AppCompatActivity {
 
                         byte[] key = "1234567890123456".getBytes(StandardCharsets.UTF_8);
                         byte[] nonce = "6543210987654321".getBytes(StandardCharsets.UTF_8);
-                        byte[] ciphertext;
+                        byte[] completeCiphertext;
                         byte[] decryptedtext;
-                        ciphertext = ascon128av12Encryption(key, nonce, plaintext, additionalData);
+                        completeCiphertext = ascon128av12Encryption(key, nonce, plaintext, additionalData);
+
                         printlnX("plaintext:  " + plaintextString);
                         printlnX("plaintext:  " + bytesToHex(plaintext));
                         printlnX("aead:       " + additionalDataString);
@@ -148,30 +173,51 @@ public class MainActivity extends AppCompatActivity {
                         printlnX("keyLen:     " + key.length);
                         printlnX("nonce:      " + bytesToHex(nonce));
                         printlnX("nonceLen:   " + nonce.length);
-                        printlnX("ciphertext: " + bytesToHex(ciphertext));
-                        printlnX("ciphertLen: " + ciphertext.length);
-                        decryptedtext = ascon128av12Decryption(key, nonce, ciphertext, additionalData);
+                        printlnX("ciphertext: " + bytesToHex(completeCiphertext));
+                        printlnX("ciphertLen: " + completeCiphertext.length);
+                        decryptedtext = ascon128av12Decryption(key, nonce, completeCiphertext, additionalData);
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
+
+                        // split the completeCiphertext in ciphertext and authentication tag
+                        byte[] ciphertext = new byte[(completeCiphertext.length - Ascon128av12.CRYPTO_ABYTES)];
+                        byte[] authenticationTag = new byte[Ascon128av12.CRYPTO_ABYTES];
+                        ascon128av12SplitCiphertext(completeCiphertext, ciphertext, authenticationTag);
+
+                        // combine the ciphertext and authenticationTag to completeCiphertext
+                        byte[] completeCiphertextConcat = new byte[(ciphertext.length + Ascon128av12.CRYPTO_ABYTES)];
+                        ascon128av12ConcatenateCiphertext(completeCiphertextConcat, ciphertext, authenticationTag);
+                        // run the decryption
+                        byte[] decryptedtextConcat;
+                        decryptedtextConcat = ascon128av12Decryption(key, nonce, completeCiphertextConcat, additionalData);
+
+                        printlnX("-------- complete ciphertext split --------");
+                        printlnX("ciphertext: " + bytesToHex(ciphertext));
+                        printlnX("ciphertLen: " + ciphertext.length);
+                        printlnX("authTag:    " + bytesToHex(authenticationTag));
+                        printlnX("authTagLen: " + authenticationTag.length);
+                        printlnX("decrypText: " + bytesToHex(decryptedtextConcat));
+                        printlnX("decrypText: " + new String(decryptedtextConcat, StandardCharsets.UTF_8));
+                        printlnX("-------- complete ciphertext split end ----");
 
                         printlnX("\n** wrong additional data for decryption **");
                         String additionalDataWrongString = "ABD";
                         byte[] additionalDataWrong = additionalDataWrongString.getBytes(StandardCharsets.UTF_8);
-                        decryptedtext = ascon128v12Decryption(key, nonce, ciphertext, additionalDataWrong);
+                        decryptedtext = ascon128v12Decryption(key, nonce, completeCiphertext, additionalDataWrong);
                         printlnX("aead wrong: " + bytesToHex(additionalDataWrong));
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
 
                         printlnX("\n** wrong key for decryption **");
                         byte[] keyWrong = "1234567890123457".getBytes(StandardCharsets.UTF_8);
-                        decryptedtext = ascon128v12Decryption(keyWrong, nonce, ciphertext, additionalData);
+                        decryptedtext = ascon128v12Decryption(keyWrong, nonce, completeCiphertext, additionalData);
                         printlnX("key wrong:  " + bytesToHex(keyWrong));
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
 
                         printlnX("\n** wrong nonce for decryption **");
                         byte[] nonceyWrong = "6543210987654320".getBytes(StandardCharsets.UTF_8);
-                        decryptedtext = ascon128v12Decryption(key, nonceyWrong, ciphertext, additionalData);
+                        decryptedtext = ascon128v12Decryption(key, nonceyWrong, completeCiphertext, additionalData);
                         printlnX("nonce wrong:" + bytesToHex(nonceyWrong));
                         printlnX("decrypText: " + bytesToHex(decryptedtext));
                         printlnX("decrypText: " + new String(decryptedtext, StandardCharsets.UTF_8));
@@ -185,6 +231,164 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    /**
+     * the method splits the completeCiphertext in ciphertext and authenticationTag
+     * @param completeCiphertext
+     * @return [0] ciphertext [1] authenticationTag
+     */
+    private byte[][] ascon128v12SplitCiphertextOld(@NonNull byte[] completeCiphertext) {
+        byte[][] returnValue = new byte[2][];
+        // sanity checks
+        int completeCiphertextLength = completeCiphertext.length;
+        if (completeCiphertextLength <= Ascon128v12.CRYPTO_ABYTES) {
+            Log.e(TAG, "the completeCiphertext is too short");
+            returnValue[0]  = new byte[0];
+            returnValue[1]  = new byte[0];
+            return returnValue;
+        }
+        returnValue[0] = new byte[(completeCiphertextLength - Ascon128v12.CRYPTO_ABYTES)];
+        returnValue[1] = new byte[Ascon128v12.CRYPTO_ABYTES];
+        returnValue[0] = Arrays.copyOfRange(completeCiphertext, 0, (completeCiphertextLength - Ascon128v12.CRYPTO_ABYTES));
+        returnValue[1] = Arrays.copyOfRange(completeCiphertext, (completeCiphertextLength - Ascon128v12.CRYPTO_ABYTES), completeCiphertextLength);
+        return returnValue;
+    }
+
+    /**
+     * the method splits the completeCiphertext in ciphertext and authenticationTag
+     * @param completeCiphertext the complete ciphertext with concatenated ciphertext | authenticationTag
+     * @param ciphertext an empty byte array with length of (completeCiphertext length - Ascon128v12.CRYPTO_ABYTES)
+     * @param authenticationTag an empty byte array with length of Ascon128v12.CRYPTO_ABYTES = 16 bytes long
+     * @return length of ciphertext or 0 if something was wrong
+     */
+    private int ascon128v12SplitCiphertext(@NonNull byte[] completeCiphertext, byte[] ciphertext, byte[] authenticationTag) {
+        final int AUTHTAG_LENGTH = Ascon128v12.CRYPTO_ABYTES; // should be 16
+        // sanity checks
+        int completeCiphertextLength = completeCiphertext.length;
+        if (completeCiphertextLength <= AUTHTAG_LENGTH) {
+            Log.e(TAG, "the completeCiphertext is too short");
+            return 0;
+        }
+        int ciphertextLength = ciphertext.length;
+        int authenticationTagLength = authenticationTag.length;
+        if (ciphertext.length != (completeCiphertextLength - AUTHTAG_LENGTH)) {
+            Log.e(TAG, "ciphertext length does not fit, should be " +
+                    (completeCiphertextLength - AUTHTAG_LENGTH) +
+                    " but found " + ciphertextLength);
+            return 0;
+        }
+        if (authenticationTagLength != (AUTHTAG_LENGTH)) {
+            Log.e(TAG, "authenticationTag length does not fit, should be " +
+                    AUTHTAG_LENGTH +
+                    " but found " + authenticationTagLength);
+            return 0;
+        }
+        System.arraycopy(completeCiphertext, 0, ciphertext, 0, (completeCiphertextLength - AUTHTAG_LENGTH));
+        System.arraycopy(completeCiphertext, (completeCiphertextLength - AUTHTAG_LENGTH), authenticationTag, 0, AUTHTAG_LENGTH);
+        return ciphertextLength;
+    }
+
+    /**
+     * the method concatenates ciphertext and authenticationTag to completeCiphertext
+     * @param completeCiphertext the complete ciphertext with concatenated ciphertext | authenticationTag, an empty byte array with a length of ciphertext length + Ascon128v12.CRYPTO_ABYTES
+     * @param ciphertext an byte array with a minimum length of 1
+     * @param authenticationTag an byte array with the authenticationTag of a length of Ascon128v12.CRYPTO_ABYTES = 16 bytes long
+     * @return length of completeCiphertext or 0 if something was wrong
+     */
+    private int ascon128v12ConcatenateCiphertext(@NonNull byte[] completeCiphertext, byte[] ciphertext, byte[] authenticationTag) {
+        final int AUTHTAG_LENGTH = Ascon128v12.CRYPTO_ABYTES; // should be 16
+        // sanity checks
+        int ciphertextLength = ciphertext.length;
+        int authenticationTagLength = authenticationTag.length;
+        if (ciphertext.length < 1) {
+            Log.e(TAG, "ciphertext is too short (found 0 bytes length");
+            return 0;
+        }
+        if (authenticationTagLength != (AUTHTAG_LENGTH)) {
+            Log.e(TAG, "authenticationTag length does not fit, should be " +
+                    AUTHTAG_LENGTH +
+                    " but found " + authenticationTagLength);
+            return 0;
+        }
+        int completeCiphertextLength = completeCiphertext.length;
+        if (completeCiphertextLength != (ciphertextLength + AUTHTAG_LENGTH)) {
+            Log.e(TAG, "the completeCiphertext length does not fit is, should be " +
+                    (ciphertextLength + AUTHTAG_LENGTH) +
+                    " but found " + completeCiphertextLength);
+            return 0;
+        }
+        System.arraycopy(ciphertext, 0, completeCiphertext, 0, ciphertextLength);
+        System.arraycopy(authenticationTag, 0, completeCiphertext, ciphertextLength, AUTHTAG_LENGTH);
+        return completeCiphertextLength;
+    }
+
+    /**
+     * the method splits the completeCiphertext in ciphertext and authenticationTag
+     * @param completeCiphertext the complete ciphertext with concatenated ciphertext | authenticationTag
+     * @param ciphertext an empty byte array with length of (completeCiphertext length - Ascon128av12.CRYPTO_ABYTES)
+     * @param authenticationTag an empty byte array with length of Ascon128av12.CRYPTO_ABYTES = 16 bytes long
+     * @return length of ciphertext or 0 if something was wrong
+     */
+    private int ascon128av12SplitCiphertext(@NonNull byte[] completeCiphertext, byte[] ciphertext, byte[] authenticationTag) {
+        final int AUTHTAG_LENGTH = Ascon128av12.CRYPTO_ABYTES; // should be 16
+        // sanity checks
+        int completeCiphertextLength = completeCiphertext.length;
+        if (completeCiphertextLength <= AUTHTAG_LENGTH) {
+            Log.e(TAG, "the completeCiphertext is too short");
+            return 0;
+        }
+        int ciphertextLength = ciphertext.length;
+        int authenticationTagLength = authenticationTag.length;
+        if (ciphertext.length != (completeCiphertextLength - AUTHTAG_LENGTH)) {
+            Log.e(TAG, "ciphertext length does not fit, should be " +
+                    (completeCiphertextLength - AUTHTAG_LENGTH) +
+                    " but found " + ciphertextLength);
+            return 0;
+        }
+        if (authenticationTagLength != (AUTHTAG_LENGTH)) {
+            Log.e(TAG, "authenticationTag length does not fit, should be " +
+                    AUTHTAG_LENGTH +
+                    " but found " + authenticationTagLength);
+            return 0;
+        }
+        System.arraycopy(completeCiphertext, 0, ciphertext, 0, (completeCiphertextLength - AUTHTAG_LENGTH));
+        System.arraycopy(completeCiphertext, (completeCiphertextLength - AUTHTAG_LENGTH), authenticationTag, 0, AUTHTAG_LENGTH);
+        return ciphertextLength;
+    }
+
+    /**
+     * the method concatenates ciphertext and authenticationTag to completeCiphertext
+     * @param completeCiphertext the complete ciphertext with concatenated ciphertext | authenticationTag, an empty byte array with a length of ciphertext length + Ascon128av12.CRYPTO_ABYTES
+     * @param ciphertext an byte array with a minimum length of 1
+     * @param authenticationTag an byte array with the authenticationTag of a length of Ascon128av12.CRYPTO_ABYTES = 16 bytes long
+     * @return length of completeCiphertext or 0 if something was wrong
+     */
+    private int ascon128av12ConcatenateCiphertext(@NonNull byte[] completeCiphertext, byte[] ciphertext, byte[] authenticationTag) {
+        final int AUTHTAG_LENGTH = Ascon128av12.CRYPTO_ABYTES; // should be 16
+        // sanity checks
+        int ciphertextLength = ciphertext.length;
+        int authenticationTagLength = authenticationTag.length;
+        if (ciphertext.length < 1) {
+            Log.e(TAG, "ciphertext is too short (found 0 bytes length");
+            return 0;
+        }
+        if (authenticationTagLength != (AUTHTAG_LENGTH)) {
+            Log.e(TAG, "authenticationTag length does not fit, should be " +
+                    AUTHTAG_LENGTH +
+                    " but found " + authenticationTagLength);
+            return 0;
+        }
+        int completeCiphertextLength = completeCiphertext.length;
+        if (completeCiphertextLength != (ciphertextLength + AUTHTAG_LENGTH)) {
+            Log.e(TAG, "the completeCiphertext length does not fit is, should be " +
+                    (ciphertextLength + AUTHTAG_LENGTH) +
+                    " but found " + completeCiphertextLength);
+            return 0;
+        }
+        System.arraycopy(ciphertext, 0, completeCiphertext, 0, ciphertextLength);
+        System.arraycopy(authenticationTag, 0, completeCiphertext, ciphertextLength, AUTHTAG_LENGTH);
+        return completeCiphertextLength;
     }
 
     private byte[] ascon128v12Encryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] plaintext, byte[] additionalData) {
