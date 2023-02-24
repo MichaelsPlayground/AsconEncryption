@@ -1,6 +1,39 @@
 # Ascon Encryption
 
-This is an example app that shows how
+**Secure your device with ASCON, the new encryption standard for small devices (Java)**
+
+On Feb. 7th. 2023 NIST (https://csrc.nist.gov/News/2023/lightweight-cryptography-nist-selects-ascon) 
+announced the selection of the encryption algorithm family ASCON as new standard for encryption on small devices:
+
+The team has decided to standardize the Ascon family for lightweight cryptography applications as it 
+meets the needs of most use cases where lightweight cryptography is required. Congratulations to the 
+Ascon team! NIST thanks all of the finalist teams and the community members who provided feedback that 
+contributed to the selection.
+
+My first impression was "why do we need a new encryption algorithm, we do have AES-CBC, AES-GCM and the 
+Libsodium encryption schemes ?". But then I realized that these algorithms usually run fast on modern 
+computers and smartphones because they have special instruction sets in their microcontrollers that 
+optimize the algorithms running. The new algorithm is dedicated to those devices with a different 
+chipset like Bluetooth beacons or sensors or NFC/RFID environments that run with limited resources 
+("small devices").
+
+The ASCON algorithm works very similar to the well known AES-GCM algorithm as it provides an authenticated 
+encryption and can authenticate (unencrypted) additional data ("AEAD") as well.
+
+This is the profile of the algorithm:
+- encryption type: symmetric encryption
+- key length: 128 bit (16 byte)
+- block length: 128 bit (16 byte)
+- nonce length: 128 bit (16 byte)
+- authentication tag length: 128 bit (16 byte)
+
+You find more details on the algorithm on the inventor`s website (https://ascon.iaik.tugraz.at/index.html); 
+the latest specification update is  available on the NIST page: 
+https://csrc.nist.gov/csrc/media/Projects/lightweight-cryptography/documents/finalist-round/status-updates/ascon-update.pdf. 
+
+The algorithm was invented by Christoph Dobraunig, Maria Eichlseder, Florian Mendel and Martin Schläffer.
+
+Find the complete article on Medium.com: 
 
 ![client_view_after_connect](docs/Ascon01.png?raw=true)
 
