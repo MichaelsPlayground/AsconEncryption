@@ -33,7 +33,7 @@ https://csrc.nist.gov/csrc/media/Projects/lightweight-cryptography/documents/fin
 
 The algorithm was invented by Christoph Dobraunig, Maria Eichlseder, Florian Mendel and Martin Schläffer.
 
-Find the complete article on Medium.com: 
+Find the complete article on Medium.com: https://medium.com/@androidcrypto/secure-your-device-with-ascon-the-new-encryption-standard-for-small-devices-java-ccb5447489c6
 
 ![client_view_after_connect](docs/Ascon01.png?raw=true)
 
