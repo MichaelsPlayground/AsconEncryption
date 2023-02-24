@@ -1,5 +1,13 @@
 # Ascon Encryption
 
+This is an example app that shows how
+
+![client_view_after_connect](docs/Ascon01.png?raw=true)
+![client_view_after_connect](docs/Ascon02.png?raw=true)
+![client_view_after_connect](docs/Ascon03.png?raw=true)
+![client_view_after_connect](docs/Ascon04.png?raw=true)
+![client_view_after_connect](docs/Ascon05.png?raw=true)
+
 Lightweight Cryptography Standardization Process: NIST Selects Ascon
 
 NIST final chosen algorithm: https://csrc.nist.gov/News/2023/lightweight-cryptography-nist-selects-ascon
@@ -30,6 +38,7 @@ Medium: https://medium.com/asecuritysite-when-bob-met-alice/ascon-is-a-light-wei
 
 Online: https://asecuritysite.com/light/lw_ascon
 
+https://replit.com/@javacrypto/AsconEncryptionWithJava#Main.java
 
 
 

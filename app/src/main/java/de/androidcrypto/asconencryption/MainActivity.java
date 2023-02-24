@@ -233,26 +233,75 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+
     /**
-     * the method splits the completeCiphertext in ciphertext and authenticationTag
-     * @param completeCiphertext
-     * @return [0] ciphertext [1] authenticationTag
+     * section for ASCON-128 V12
      */
-    private byte[][] ascon128v12SplitCiphertextOld(@NonNull byte[] completeCiphertext) {
-        byte[][] returnValue = new byte[2][];
+
+    /**
+     * the method encrypts plaintext using the algorithm ASCON128V12
+     * @param key 16 bytes long
+     * @param nonce 16 bytes long
+     * @param plaintext
+     * @param additionalData (note: if providing additional data on encryption you have to provide the same data for decryption)
+     * @return the ciphertext
+     */
+
+    private byte[] ascon128v12Encryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] plaintext, byte[] additionalData) {
         // sanity checks
-        int completeCiphertextLength = completeCiphertext.length;
-        if (completeCiphertextLength <= Ascon128v12.CRYPTO_ABYTES) {
-            Log.e(TAG, "the completeCiphertext is too short");
-            returnValue[0]  = new byte[0];
-            returnValue[1]  = new byte[0];
-            return returnValue;
+        if (key.length != 16) {
+            Log.e(TAG, "the key length has to be 16, found " + key.length);
+            return new byte[0];
         }
-        returnValue[0] = new byte[(completeCiphertextLength - Ascon128v12.CRYPTO_ABYTES)];
-        returnValue[1] = new byte[Ascon128v12.CRYPTO_ABYTES];
-        returnValue[0] = Arrays.copyOfRange(completeCiphertext, 0, (completeCiphertextLength - Ascon128v12.CRYPTO_ABYTES));
-        returnValue[1] = Arrays.copyOfRange(completeCiphertext, (completeCiphertextLength - Ascon128v12.CRYPTO_ABYTES), completeCiphertextLength);
-        return returnValue;
+        if (nonce.length != 16) {
+            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
+            return new byte[0];
+        }
+        int additionalDataLength;
+        if (additionalData == null) {
+            additionalDataLength = 0;
+        } else {
+            additionalDataLength = additionalData.length;
+        }
+        byte[] s = {};
+        byte[] ciphertext = new byte[plaintext.length + Ascon128v12.CRYPTO_ABYTES];
+        int clen = Ascon128v12.crypto_aead_encrypt(ciphertext, ciphertext.length, plaintext, plaintext.length, additionalData, additionalDataLength, s, nonce, key);
+        return ciphertext;
+    }
+
+    /**
+     * the method decrypts ciphertext using the algorithm ASCON128V12
+     * @param key 16 bytes long
+     * @param nonce 16 bytes long
+     * @param ciphertext
+     * @param additionalData (note: if providing additional data on encryption you have to provide the same data for decryption)
+     * @return the decryptedtext = plaintext
+     */
+    private byte[] ascon128v12Decryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] ciphertext, byte[] additionalData) {
+        // sanity checks
+        if (key.length != 16) {
+            Log.e(TAG, "the key length has to be 16, found " + key.length);
+            return new byte[0];
+        }
+        if (nonce.length != 16) {
+            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
+            return new byte[0];
+        }
+        int additionalDataLength;
+        if (additionalData == null) {
+            additionalDataLength = 0;
+        } else {
+            additionalDataLength = additionalData.length;
+        }
+        byte[] s = {};
+        byte[] plaintext = new byte[ciphertext.length + Ascon128v12.CRYPTO_ABYTES];
+        int plen = Ascon128v12.crypto_aead_decrypt(plaintext, plaintext.length, s, ciphertext, ciphertext.length, additionalData, additionalDataLength, nonce, key);
+        if (plen != -1) {
+            return Arrays.copyOfRange(plaintext, 0, plen);
+        } else {
+            return new byte[0];
+        }
     }
 
     /**
@@ -323,6 +372,75 @@ public class MainActivity extends AppCompatActivity {
         return completeCiphertextLength;
     }
 
+
+    /**
+     * section for ASCON-128 AV12
+     */
+
+    /**
+     * the method encrypts plaintext using the algorithm ASCON128AV12
+     * @param key 16 bytes long
+     * @param nonce 16 bytes long
+     * @param plaintext
+     * @param additionalData (note: if providing additional data on encryption you have to provide the same data for decryption)
+     * @return the ciphertext
+     */
+    private byte[] ascon128av12Encryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] plaintext, byte[] additionalData) {
+        // sanity checks
+        if (key.length != 16) {
+            Log.e(TAG, "the key length has to be 16, found " + key.length);
+            return new byte[0];
+        }
+        if (nonce.length != 16) {
+            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
+            return new byte[0];
+        }
+        int additionalDataLength;
+        if (additionalData == null) {
+            additionalDataLength = 0;
+        } else {
+            additionalDataLength = additionalData.length;
+        }
+        byte[] s = {};
+        byte[] ciphertext = new byte[plaintext.length + Ascon128av12.CRYPTO_ABYTES];
+        int clen = Ascon128av12.crypto_aead_encrypt(ciphertext, ciphertext.length, plaintext, plaintext.length, additionalData, additionalDataLength, s, nonce, key);
+        return ciphertext;
+    }
+
+    /**
+     * the method decrypts ciphertext using the algorithm ASCON128AV12
+     * @param key 16 bytes long
+     * @param nonce 16 bytes long
+     * @param ciphertext
+     * @param additionalData (note: if providing additional data on encryption you have to provide the same data for decryption)
+     * @return the decryptedtext = plaintext
+     */
+    private byte[] ascon128av12Decryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] ciphertext, byte[] additionalData) {
+        // sanity checks
+        if (key.length != 16) {
+            Log.e(TAG, "the key length has to be 16, found " + key.length);
+            return new byte[0];
+        }
+        if (nonce.length != 16) {
+            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
+            return new byte[0];
+        }
+        int additionalDataLength;
+        if (additionalData == null) {
+            additionalDataLength = 0;
+        } else {
+            additionalDataLength = additionalData.length;
+        }
+        byte[] s = {};
+        byte[] plaintext = new byte[ciphertext.length + Ascon128av12.CRYPTO_ABYTES];
+        int plen = Ascon128av12.crypto_aead_decrypt(plaintext, plaintext.length, s, ciphertext, ciphertext.length, additionalData, additionalDataLength, nonce, key);
+        if (plen != -1) {
+            return Arrays.copyOfRange(plaintext, 0, plen);
+        } else {
+            return new byte[0];
+        }
+    }
+
     /**
      * the method splits the completeCiphertext in ciphertext and authenticationTag
      * @param completeCiphertext the complete ciphertext with concatenated ciphertext | authenticationTag
@@ -391,101 +509,9 @@ public class MainActivity extends AppCompatActivity {
         return completeCiphertextLength;
     }
 
-    private byte[] ascon128v12Encryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] plaintext, byte[] additionalData) {
-        // sanity checks
-        if (key.length != 16) {
-            Log.e(TAG, "the key length has to be 16, found " + key.length);
-            return new byte[0];
-        }
-        if (nonce.length != 16) {
-            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
-            return new byte[0];
-        }
-        int additionalDataLength;
-        if (additionalData == null) {
-            additionalDataLength = 0;
-        } else {
-            additionalDataLength = additionalData.length;
-        }
-        byte[] s = {};
-        byte[] ciphertext = new byte[plaintext.length + Ascon128v12.CRYPTO_ABYTES];
-        int clen = Ascon128v12.crypto_aead_encrypt(ciphertext, ciphertext.length, plaintext, plaintext.length, additionalData, additionalDataLength, s, nonce, key);
-        return ciphertext;
-    }
-
-    private byte[] ascon128v12Decryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] ciphertext, byte[] additionalData) {
-        // sanity checks
-        if (key.length != 16) {
-            Log.e(TAG, "the key length has to be 16, found " + key.length);
-            return new byte[0];
-        }
-        if (nonce.length != 16) {
-            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
-            return new byte[0];
-        }
-        int additionalDataLength;
-        if (additionalData == null) {
-            additionalDataLength = 0;
-        } else {
-            additionalDataLength = additionalData.length;
-        }
-        byte[] s = {};
-        byte[] plaintext = new byte[ciphertext.length + Ascon128v12.CRYPTO_ABYTES];
-        int plen = Ascon128v12.crypto_aead_decrypt(plaintext, plaintext.length, s, ciphertext, ciphertext.length, additionalData, additionalDataLength, nonce, key);
-        if (plen != -1) {
-            return Arrays.copyOfRange(plaintext, 0, plen);
-        } else {
-            return new byte[0];
-        }
-    }
-
-    private byte[] ascon128av12Encryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] plaintext, byte[] additionalData) {
-        // sanity checks
-        if (key.length != 16) {
-            Log.e(TAG, "the key length has to be 16, found " + key.length);
-            return new byte[0];
-        }
-        if (nonce.length != 16) {
-            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
-            return new byte[0];
-        }
-        int additionalDataLength;
-        if (additionalData == null) {
-            additionalDataLength = 0;
-        } else {
-            additionalDataLength = additionalData.length;
-        }
-        byte[] s = {};
-        byte[] ciphertext = new byte[plaintext.length + Ascon128av12.CRYPTO_ABYTES];
-        int clen = Ascon128av12.crypto_aead_encrypt(ciphertext, ciphertext.length, plaintext, plaintext.length, additionalData, additionalDataLength, s, nonce, key);
-        return ciphertext;
-    }
-
-    private byte[] ascon128av12Decryption(@NonNull byte[] key, @NonNull byte[] nonce, @NonNull byte[] ciphertext, byte[] additionalData) {
-        // sanity checks
-        if (key.length != 16) {
-            Log.e(TAG, "the key length has to be 16, found " + key.length);
-            return new byte[0];
-        }
-        if (nonce.length != 16) {
-            Log.e(TAG, "the nonce length has to be 16, found " + nonce.length);
-            return new byte[0];
-        }
-        int additionalDataLength;
-        if (additionalData == null) {
-            additionalDataLength = 0;
-        } else {
-            additionalDataLength = additionalData.length;
-        }
-        byte[] s = {};
-        byte[] plaintext = new byte[ciphertext.length + Ascon128av12.CRYPTO_ABYTES];
-        int plen = Ascon128av12.crypto_aead_decrypt(plaintext, plaintext.length, s, ciphertext, ciphertext.length, additionalData, additionalDataLength, nonce, key);
-        if (plen != -1) {
-            return Arrays.copyOfRange(plaintext, 0, plen);
-        } else {
-            return new byte[0];
-        }
-    }
+    /**
+     * general code
+     */
 
     public void clearConsole() {
         consoleText = "";
@@ -634,7 +660,6 @@ public class MainActivity extends AppCompatActivity {
         printlnX("Android version: " + getAndroidVersion());
 
     }
-
     private static String bytesToHex(byte[] bytes) {
         StringBuffer result = new StringBuffer();
         for (byte b : bytes) result.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));

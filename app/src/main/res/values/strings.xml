@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Ascon Encryption</string>
     <string name="textViewConsoleText">After choosing an algorithm it may take some seconds before a result is shown, please be patient</string>
-    <string name="warning_en">This app uses the lightweight encryption code ASCON128 for encryption.\n\nIt is an authenticated algorithm that may use additional data (AEAD).\n\nIt was chosen by NIST in Feb. 2023 for encryption on small devices.</string>
+    <string name="warning_en">This app uses the lightweight encryption algorithm ASCON128 for encryption.\n\nIt is an authenticated algorithm that may use additional data (AEAD).\n\nIt was chosen by NIST in Feb. 2023 for encryption on small devices.</string>
 </resources>
